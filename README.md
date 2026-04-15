@@ -194,7 +194,24 @@ You can add more tests in `tests/test_recommender.py`.
 
 ---
 
+## Stress Test — Five User Profiles
+
+I ran `python -m src.main` against five profiles to see whether the system produces sensible, *different* top-5s. Screenshot of terminal output goes here. Summary of top pick for each:
+
+| Profile | Top Pick | Score | Notes |
+|---|---|---|---|
+| High-Energy Pop | Sunrise City | 4.38 | 3-of-3 match |
+| Chill Lofi Study | Library Rain | 4.50 | 3-of-3 match |
+| Deep Intense Rock | Storm Runner | 4.44 | 3-of-3 match |
+| Conflicting (Sad but Hype) | Bass Drop Circuit | 3.42 | Genre + energy; mood ignored |
+| Numbers-Only (energy 0.5) | Heartbreak Highway | 1.47 | Flat score distribution |
+
+See [reflection.md](reflection.md) for the full pair-by-pair comparison.
+
 ## Experiments You Tried
+
+**Experiment: doubled energy weight, halved genre weight.** Changed `GENRE_WEIGHT` from 2.0 → 1.0 and `ENERGY_WEIGHT` from 1.5 → 3.0 in `score_song`. The clean-profile top picks stayed the same (Sunrise City, Library Rain, Storm Runner all still #1), but lower ranks shifted — for High-Energy Pop, Storm Runner (rock) cracked the top 5 on energy alone, and Rooftop Lights jumped above Gym Hero because it matches mood. The change made the rankings *different* but not clearly *more accurate* — when I listen to music I do care about genre, so demoting it felt wrong. I reverted to the original weights.
+
 
 Use this section to document the experiments you ran. For example:
 
@@ -224,10 +241,9 @@ Read and complete `model_card.md`:
 
 [**Model Card**](model_card.md)
 
-Write 1 to 2 paragraphs here about what you learned:
+The biggest thing I learned is that a recommender is really just a weighted sum plus a sort — the "intelligence" is in the weights, not some hidden AI magic. Picking `GENRE_WEIGHT = 2.0` felt arbitrary when I typed it, but that one number reshapes every recommendation the system makes. That's exactly where bias sneaks in: not through bad intent, but through casual numeric choices nobody stops to question. In a real product, that same careless choice would decide which artists get played and which don't.
 
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
+Using Copilot helped me move fast on boilerplate (CSV parsing, sort patterns, extra dataset rows), but I had to double-check anything it suggested about *what features to use* — it tended to hallucinate feature names that weren't in my actual CSV. The surprising part was how much the output *feels* like a real recommendation even though the logic is trivial, purely because each pick comes with a short reason string. Transparency makes a dumb system feel competent. If I kept going I'd add a thumbs-up/down loop in the CLI to adjust weights over time, and try a toy collaborative-filtering version to compare the two approaches side by side.
 
 
 ---
